@@ -19,7 +19,6 @@ class AnimalListAdapter(val items: List<Animal>,private val onClickListener: OnC
 
     override fun getItemCount(): Int {
         return items.size
-
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {

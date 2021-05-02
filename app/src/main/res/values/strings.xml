@@ -1,4 +1,6 @@
 <resources>
-    <string name="app_name">AnimalFinderGame</string>
-    <string name="levelPass">Congratulations You Got All 3 Animals Right. You Can Skip To The Next Section</string>
+    <string name="app_name">Animal Finder</string>
+    <string name="levelPass">Congratulations You Find All 3 Animals Right. You Can Skip To The Next Level</string>
+    <string name="mainText">Listen Sound and Match the Animal</string>
+    <string name="logoText">Find Animal</string>
 </resources>

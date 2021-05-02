@@ -12,10 +12,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-           >
-
+            android:layout_height="match_parent">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -26,9 +23,8 @@
                 android:text="YOU WON!!"
                 android:textStyle="bold"
                 android:textSize="40sp"
-                android:textColor="#cf0000"
+                android:textColor="@color/yellow"
                 android:gravity="center_horizontal|center_vertical"/>
-
 
             <ImageView
                 android:id="@+id/imageView3"
@@ -37,22 +33,20 @@
                 android:src="@drawable/ic_winner"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.496"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.317" />
+                app:layout_constraintVertical_bias="0.363" />
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="220dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="20dp"
                 android:gravity="center_horizontal|center_vertical"
                 android:text="@string/levelPass"
-                android:textColor="#cf0000"
+                android:textColor="@color/yellow"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.492"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/imageView3" />
 
@@ -60,32 +54,24 @@
                 android:id="@+id/continueButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#efe7ff"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="@color/yellow"
                 android:clickable="true"
                 android:focusable="true"
                 android:text="Skip"
                 android:textAllCaps="false"
-                android:textColor="#132c33"
+                android:textColor="@color/white"
                 android:textSize="17sp"
                 android:textStyle="bold"
+                android:layout_marginBottom="25dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView"
-                app:layout_constraintVertical_bias="0.281" />
-
+                app:layout_constraintVertical_bias="0.0" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-
-
-
-
     </androidx.cardview.widget.CardView>
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

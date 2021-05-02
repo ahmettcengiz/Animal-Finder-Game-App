@@ -6,21 +6,25 @@ import android.graphics.drawable.ColorDrawable
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.adapters.AnimalListAdapter
 import com.example.functions.LevelDesign
 import com.example.objects.Animal
-import kotlinx.android.synthetic.main.activity_level1.*
+import kotlinx.android.synthetic.main.activity_level.*
 import kotlinx.android.synthetic.main.win_dialog_layout.*
 import java.util.*
 import kotlin.collections.ArrayList
 
-class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
+class TimeRushMode : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var tts: TextToSpeech? = null
+    private var correctTts: TextToSpeech? = null
     var mediaPlayer: MediaPlayer? = null
     var adapter: AnimalListAdapter? = null
     var dialog:Dialog?=null
@@ -34,21 +38,42 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_level1)
-        levelText.setText("LEVEL"+level.toString())
+        setContentView(R.layout.activity_level)
+        levelText.setText("LEVEL "+level.toString())
         tts = TextToSpeech(this, this)
+        correctTts = TextToSpeech(this, this)
         dialog = Dialog(this)
-        scoreText.setText(""+score.toString())
+        scoreText.setText("Score : "+score.toString())
 
         val newAnimalList = LevelDesign().decideLevel(levelMap.get(level)!!)
         var correctAnimal = LevelDesign().decideCorrectAnimal(newAnimalList)
 
-        animalImageView!!.setOnClickListener {
-            //speakOut()
-            mediaPlayer = MediaPlayer.create(this, correctAnimal.soundUrl)
-            mediaPlayer!!.start()
-        }
+        val handler = Handler()
+        handler.postDelayed(Runnable {
+            mediaPlayer = MediaPlayer.create(applicationContext, correctAnimal.soundUrl)
+            speakOut(correctAnimal)
+        }, 100)
 
+        tts!!.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onDone(utteranceId: String?) {
+                if (utteranceId=="1") {
+                    mediaPlayer!!.start()
+                }
+
+            }
+            override fun onError(utteranceId: String?) {
+
+            }
+            override fun onStart(utteranceId: String?) {
+
+            }
+        })
+
+        animalImageView!!.setOnClickListener {
+            mediaPlayer = MediaPlayer.create(applicationContext, correctAnimal.soundUrl)
+            speakOut(correctAnimal)
+
+        }
 
         countObject = createTimer(levelTime.get(level)!!)
         countObject.start()
@@ -58,42 +83,49 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
                 countObject.cancel()
 
                 if(level==5 && objects.name == correctAnimal.name && temp==2 ){
+                    stopMediaPlayer()
                     temp=0
                     score+=10
-                    mediaPlayer!!.stop()
-                    val intent = Intent(this@LevelSystem, MainActivity::class.java)
+                    speak("Congratulations You Won", 1600)
+                    val intent = Intent(this@TimeRushMode, MainActivity::class.java)
                     LevelDesign().highScore(score,applicationContext)
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
                 else if (objects.name == correctAnimal.name && temp==2){
-                    mediaPlayer!!.stop()
+                    stopMediaPlayer()
+                    speak("You got it", 1150)
                     level++
                     countObject = createTimer(levelTime.get(level)!!)
-                    openwinDialog(countObject)
                     temp=0
                     score += 10
                     levelMap.get(level)?.let { replaceOldListWithNewList(newAnimalList, it) }
                     correctAnimal=LevelDesign().decideCorrectAnimal(newAnimalList)
+                    openwinDialog(countObject,correctAnimal)
                 }
                 else if (objects.name == correctAnimal.name) {
-                    mediaPlayer!!.stop()
+                    stopMediaPlayer()
+                    speak("You got it", 1150)
                     score += 10
                     temp++
                     levelMap.get(level)?.let { replaceOldListWithNewList(newAnimalList, it) }
                     correctAnimal=LevelDesign().decideCorrectAnimal(newAnimalList)
                     countObject.start()
+                    mediaPlayer = MediaPlayer.create(applicationContext, correctAnimal.soundUrl)
+                    speakOut(correctAnimal)
                 }
                 else {
                     temp=0
-                    mediaPlayer!!.stop()
-                    val intent = Intent(this@LevelSystem, MainActivity::class.java)
+                    stopMediaPlayer()
+                    speak("Sorry Wrong Answer", 1300)
+                    tts!!.stop()
+                    val intent = Intent(this@TimeRushMode, MainActivity::class.java)
                     LevelDesign().highScore(score,applicationContext)
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                 }
-                levelText.setText("LEVEL"+level.toString())
-                scoreText.setText(""+score.toString())
+                levelText.setText("LEVEL "+level.toString())
+                scoreText.setText("Score : "+score.toString())
             }
 
         })
@@ -101,6 +133,11 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
         recyclerview.adapter=adapter
         recyclerview.layoutManager = LinearLayoutManager(this)
 
+    }
+    fun stopMediaPlayer(){
+        if(mediaPlayer!=null){
+            mediaPlayer!!.stop()
+        }
     }
 
     fun createTimer(countTempp:Int):CountDownTimer{
@@ -111,7 +148,7 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
             }
             override fun onFinish() {
                 TimeText.text = "Finished"
-                val intent = Intent(this@LevelSystem, MainActivity::class.java)
+                val intent = Intent(this@TimeRushMode, MainActivity::class.java)
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
             }
@@ -127,9 +164,14 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
         adapter?.notifyDataSetChanged()
     }
 
-    private fun speakOut() {
-        val text = "Hello Ahmet"
-        tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
+    private fun speakOut(correctAnimal:Animal) {
+        val name = correctAnimal.name.toString()
+        val text = "“Find the "+ name+","+name+" makes sound"
+        tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, "1")
+    }
+    fun speak(text: String, ms: Long) {
+        tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, "2")
+        Thread.sleep(ms)
     }
 
     override fun onInit(p0: Int) {
@@ -149,7 +191,6 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
     }
 
     public override fun onDestroy() {
-        // Shutdown TTS
         if (tts != null) {
             tts!!.stop()
             tts!!.shutdown()
@@ -157,8 +198,9 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
         super.onDestroy()
     }
 
-    fun openwinDialog(k:CountDownTimer){
+    fun openwinDialog(k:CountDownTimer,correctAnimal: Animal){
         k.cancel()
+        TimeText.visibility= View.INVISIBLE
         dialog!!.setContentView(R.layout.win_dialog_layout)
         dialog!!.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         dialog!!.setCanceledOnTouchOutside(false);
@@ -167,6 +209,9 @@ class LevelSystem : AppCompatActivity(), TextToSpeech.OnInitListener {
         dialog!!.show()
        continueButton.setOnClickListener(){
            dialog!!.dismiss()
+           mediaPlayer = MediaPlayer.create(applicationContext, correctAnimal.soundUrl)
+           speakOut(correctAnimal)
+           TimeText.visibility= View.VISIBLE
            k.start()
        }
     }
