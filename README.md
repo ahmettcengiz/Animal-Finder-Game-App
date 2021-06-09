@@ -1,4 +1,4 @@
-# Animal Finder Game App
+# ANIMAL FINDER GAME APP
 We are asked to develop animal finder game for children under age of 6. In this
 application, we will show images of some animals on screen and ask children to click which of the
 animal to be found. My application needs to talk with children because they often do not know
